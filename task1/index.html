@@ -203,7 +203,7 @@
             </div>
 
 
-            <div class="directory-grid">
+            <div class="directory-grid" id="employee-grid">
                 <!-- Employee Card 1 -->
                 <div class="employee-card">
                     <div class="card-top">
@@ -636,9 +636,6 @@
 </div>
 
 
-
-
-
 <!-- Add Employee Modal -->
 <div class="modal-backdrop" id="add-employee-modal" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-employee-title">
@@ -705,10 +702,10 @@
     document.getElementById('add-employee-form').addEventListener('submit', function (e) {
         e.preventDefault();
         const error = document.getElementById('add-employee-error');
-        const name = document.getElementById('emp-name').value.trim();
-        const role = document.getElementById('emp-role').value.trim();
-        const dept = document.getElementById('emp-dept').value.trim();
-        const email = document.getElementById('emp-email').value.trim();
+        const name = document.getElementById('employee-name').value.trim();
+        const role = document.getElementById('employee-role').value.trim();
+        const dept = document.getElementById('employee-dept').value.trim();
+        const email = document.getElementById('employee-email').value.trim();
 
         if (!name || !role || !dept || !email) {
             error.textContent = 'Please fill in all required fields.';
@@ -721,16 +718,83 @@
 
     });
 
+    const API_URL = "http://localhost:8080/api/employees";
+
     async function loadEmployees() {
 
-        const response = await fetch(
-            'http://localhost:8080/api/employees'
-        );
+        try {
 
-        const employees = await response.json();
+            const response = await fetch(API_URL);
 
-        console.log(employees);
+            const employees = await response.json();
+
+            const grid = document.getElementById("employee-grid");
+
+            grid.innerHTML = "";
+
+            employees.forEach(emp => {
+
+                const card = document.createElement("div");
+
+                card.className = "employee-card";
+
+                card.innerHTML = `
+
+                <div class="card-top">
+                    <div class="card-avatar-wrapper">
+                        <img  class="card-avatar"/>
+                        <div class="status-dot"></div>
+                    </div>
+                    <h3 class="card-name">${emp.name}</h3>
+                    <p class="card-title">${emp.role}</p>
+                    <span class="department-badge">${emp.department}</span>
+                </div>
+                <div class="card-bottom">
+                    <div class="contact-row">
+                        <iconify-icon icon="lucide:mail"></iconify-icon>
+                        <span class="contact-text">${emp.email}</span>
+                    </div>
+                    <div class="contact-row">
+                        <iconify-icon icon="lucide:phone"></iconify-icon>
+                    </div>
+                </div>
+
+            `;
+
+                grid.appendChild(card);
+
+            });
+
+        } catch (error) {
+
+            console.error("Error loading employees:", error);
+
+        }
+
     }
+
+
+    document.getElementById('add-employee-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const employee = {
+            name: document.getElementById('employee-name').value,
+            role: document.getElementById('employee-role').value,
+            department: document.getElementById('employee-dept').value,
+            email: document.getElementById('employee-email').value
+        };
+
+        await fetch("http://localhost:8080/api/employees", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(employee)
+        });
+
+        closeModal();
+        loadEmployees();
+    });
 
     loadEmployees();
 </script>
