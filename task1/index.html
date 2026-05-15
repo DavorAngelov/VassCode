@@ -718,7 +718,21 @@
 
         error.setAttribute('hidden', '');
         closeModal();
+
     });
+
+    async function loadEmployees() {
+
+        const response = await fetch(
+            'http://localhost:8080/api/employees'
+        );
+
+        const employees = await response.json();
+
+        console.log(employees);
+    }
+
+    loadEmployees();
 </script>
 </body>
 </html>
